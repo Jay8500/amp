@@ -1,0 +1,88 @@
+<app-page-header [title]="(selectedBrand()?.name ?? '') + ' data'" fallback="/ott-select?next=data">
+  <button mat-icon-button type="button" aria-label="Refresh" (click)="refresh()"><mat-icon>refresh</mat-icon></button>
+</app-page-header>
+@if (records.credentialsLoading() && records.credentials()) {
+  <mat-progress-bar mode="indeterminate" />
+}
+
+@if (selectedBrand(); as b) {
+  <div class="page">
+    <div class="summary">
+      <app-brand-avatar [brand]="b" [size]="44" />
+      <div class="counts">
+        <span class="chip selected">{{ counts().selected }} Selected</span>
+        <span class="chip empty">{{ counts().empty }} Empty</span>
+      </div>
+      <button mat-flat-button type="button" (click)="addAccount()"><mat-icon>add</mat-icon> Account</button>
+    </div>
+
+    <mat-form-field class="search">
+      <mat-icon matPrefix>search</mat-icon>
+      <mat-label>Search ID, customer…</mat-label>
+      <input matInput [ngModel]="search()" (ngModelChange)="search.set($event)" />
+    </mat-form-field>
+
+    <mat-button-toggle-group class="sort" [value]="sort()" (change)="sort.set($event.value)" aria-label="Sort" hideSingleSelectionIndicator>
+      <mat-button-toggle value="selected">Selected</mat-button-toggle>
+      <mat-button-toggle value="empty">Empty</mat-button-toggle>
+      <mat-button-toggle value="validity">Validity</mat-button-toggle>
+      <mat-button-toggle value="sheet">Top–Bottom</mat-button-toggle>
+    </mat-button-toggle-group>
+
+    @if (!records.credentials()) {
+      <app-state-message [loading]="records.credentialsLoading()" [error]="records.credentialsError()" (retry)="refresh()" />
+    } @else if (!rows().length) {
+      <app-state-message icon="key_off" [message]="search() ? 'No matches.' : 'No ' + b.name + ' accounts saved yet.'">
+        @if (!search()) {
+          <button mat-stroked-button type="button" (click)="addAccount()"><mat-icon>add</mat-icon> Add account</button>
+        }
+      </app-state-message>
+    } @else {
+      <div class="list">
+        @for (row of rows(); track row._id) {
+          @let group = editing().get(row._id);
+          @let badge = validityBadge(row);
+          <article class="cred" [class.is-empty]="isEmpty(row)" [class.unlocked]="!!group">
+            <header>
+              <span class="chip" [class.empty]="isEmpty(row)" [class.selected]="!isEmpty(row)">
+                {{ isEmpty(row) ? 'Empty' : 'Selected' }}
+              </span>
+              @if (badge) {
+                <span class="chip" [class]="badge.tone">{{ badge.text }}</span>
+              }
+              <span class="spacer"></span>
+              @if (!group) {
+                <button mat-icon-button type="button" (click)="toggleReveal(row._id)" [attr.aria-label]="revealed().has(row._id) ? 'Hide password' : 'Show password'">
+                  <mat-icon>{{ revealed().has(row._id) ? 'visibility_off' : 'visibility' }}</mat-icon>
+                </button>
+              }
+              <button mat-icon-button type="button" (click)="group ? lock(row._id) : unlock(row)" [attr.aria-label]="group ? 'Lock (discard changes)' : 'Unlock to edit'">
+                <mat-icon>{{ group ? 'lock_open' : 'lock' }}</mat-icon>
+              </button>
+            </header>
+
+            @if (group) {
+              <app-dynamic-fields [fields]="fields()" [group]="group" [brands]="config.brands()" [plans]="config.plans()" />
+              <footer>
+                <button mat-button class="danger" type="button" (click)="remove(row)" [disabled]="saving() === row._id"><mat-icon>delete</mat-icon> Delete</button>
+                <span class="spacer"></span>
+                <button mat-button type="button" (click)="lock(row._id)">Cancel</button>
+                <button mat-flat-button type="button" (click)="save(row)" [disabled]="saving() === row._id">
+                  {{ saving() === row._id ? 'Saving…' : 'Save' }}
+                </button>
+              </footer>
+            } @else {
+              <dl>
+                @for (f of displayFields(); track f.key) {
+                  @if (row[f.column]) {
+                    <div [class.wide]="f.role === 'accountId' || f.type === 'textarea'"><dt>{{ f.label }}</dt><dd>{{ display(row, f) }}</dd></div>
+                  }
+                }
+              </dl>
+            }
+          </article>
+        }
+      </div>
+    }
+  </div>
+}

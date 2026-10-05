@@ -1,0 +1,80 @@
+<app-page-header title="Recent Sales">
+  <button mat-icon-button type="button" aria-label="Refresh" (click)="records.load('sale', true)"><mat-icon>refresh</mat-icon></button>
+  <button mat-icon-button type="button" aria-label="Export to Excel" (click)="exportExcel()" [disabled]="!filtered().length || exporting()">
+    <mat-icon>file_download</mat-icon>
+  </button>
+</app-page-header>
+@if ((records.salesLoading() && records.sales()) || exporting()) {
+  <mat-progress-bar mode="indeterminate" />
+}
+
+<div class="page">
+  <mat-form-field class="search">
+    <mat-icon matPrefix>search</mat-icon>
+    <mat-label>Search name or number</mat-label>
+    <input matInput [ngModel]="search()" (ngModelChange)="search.set($event)" />
+    @if (search()) {
+      <button mat-icon-button matSuffix type="button" aria-label="Clear" (click)="search.set('')"><mat-icon>close</mat-icon></button>
+    }
+  </mat-form-field>
+
+  <mat-expansion-panel class="filters">
+    <mat-expansion-panel-header>
+      <mat-panel-title><mat-icon>filter_list</mat-icon>&nbsp;Filters @if (activeFilters()) { ({{ activeFilters() }}) }</mat-panel-title>
+    </mat-expansion-panel-header>
+    <div class="filter-grid">
+      <mat-form-field>
+        <mat-label>From</mat-label>
+        <input matInput type="date" [ngModel]="from()" (ngModelChange)="from.set($event)" />
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>To</mat-label>
+        <input matInput type="date" [ngModel]="to()" (ngModelChange)="to.set($event)" />
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>Plan</mat-label>
+        <mat-select [value]="plan()" (valueChange)="plan.set($event)">
+          <mat-option value="">All plans</mat-option>
+          @for (p of planOptions(); track p) { <mat-option [value]="p">{{ p }}</mat-option> }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>OTT</mat-label>
+        <mat-select [value]="brand()" (valueChange)="brand.set($event)">
+          <mat-option value="">All OTTs</mat-option>
+          @for (b of brandOptions(); track b) { <mat-option [value]="b">{{ b }}</mat-option> }
+        </mat-select>
+      </mat-form-field>
+    </div>
+    <div class="filter-actions">
+      <button mat-button type="button" (click)="thisMonth()">This month</button>
+      <button mat-button type="button" (click)="clearFilters()" [disabled]="!activeFilters()">Clear all</button>
+    </div>
+  </mat-expansion-panel>
+
+  @if (!records.sales()) {
+    <app-state-message [loading]="records.salesLoading()" [error]="records.salesError()" (retry)="records.load('sale', true)" />
+  } @else {
+    <div class="totals">
+      <span>{{ filtered().length }} sale{{ filtered().length === 1 ? '' : 's' }}</span>
+      <b>{{ config.settings().currency }}{{ total() | number: '1.0-2' }}</b>
+    </div>
+
+    @for (s of filtered(); track s.row._id) {
+      <article class="sale">
+        <app-brand-avatar [brand]="brandFor(s.brand)" [name]="s.brand" [size]="40" />
+        <div class="main">
+          <div class="line1">
+            <b>{{ s.customerName || s.customerPhone }}</b>
+            @if (s.amount) { <span>{{ config.settings().currency }}{{ s.amount | number: '1.0-2' }}</span> }
+          </div>
+          <div class="line2">{{ s.brand }} · {{ s.plan }} · {{ s.customerPhone }}</div>
+          <div class="line2">{{ displayDate(s.activation) }} → {{ displayDate(s.expiry) }}</div>
+        </div>
+        <button mat-icon-button type="button" aria-label="Send details on WhatsApp again" (click)="resend(s)"><mat-icon>chat</mat-icon></button>
+      </article>
+    } @empty {
+      <app-state-message icon="receipt_long" [message]="activeFilters() ? 'No sales match these filters.' : 'No sales yet.'" />
+    }
+  }
+</div>

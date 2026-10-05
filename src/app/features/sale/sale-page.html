@@ -1,0 +1,57 @@
+<app-page-header title="New sale" fallback="/ott-select?next=sale" />
+
+@if (selectedBrand(); as b) {
+  <div class="page">
+    @if (sent(); as s) {
+      <section class="done">
+        <mat-icon class="big">check_circle</mat-icon>
+        <h2>Saved to your Sheet</h2>
+        <p>WhatsApp message for <b>{{ s.customer }}</b> is ready. Tap Send in WhatsApp.</p>
+        <div class="actions">
+          <button mat-flat-button type="button" (click)="reopenWhatsapp()"><mat-icon>chat</mat-icon> Open WhatsApp again</button>
+          <button mat-stroked-button type="button" (click)="newSale()"><mat-icon>add</mat-icon> Another {{ b.name }} sale</button>
+          <a mat-button routerLink="/home">Home</a>
+        </div>
+      </section>
+    } @else {
+      <div class="brand-row">
+        <app-brand-avatar [brand]="b" [size]="44" />
+        <div>
+          <h2>{{ b.name }}</h2>
+          <a routerLink="/ott-select" [queryParams]="{ next: 'sale' }">Change OTT</a>
+        </div>
+      </div>
+
+      <mat-form-field class="slot">
+        <mat-label>Pick a free screen (optional)</mat-label>
+        <mat-select [value]="slotId()" (valueChange)="pickSlot($event)" [disabled]="!freeSlots().length">
+          <mat-option value="">Enter details manually</mat-option>
+          @for (row of freeSlots(); track row._id) {
+            <mat-option [value]="row._id">{{ slotLabel(row) }}</mat-option>
+          }
+        </mat-select>
+        <mat-hint>
+          @if (credentialsLoading()) { Loading saved accounts… }
+          @else if (freeSlots().length) { {{ freeSlots().length }} free in Data. Picking one fills the ID, password and screen }
+          @else { No free {{ b.name }} screens in Data }
+        </mat-hint>
+      </mat-form-field>
+
+      <form [formGroup]="group" (ngSubmit)="send()" novalidate>
+        <app-dynamic-fields [fields]="fields" [group]="group" [brands]="config.brands()" [plans]="config.plans()" />
+
+        @if (error()) {
+          <p class="error">{{ error() }}</p>
+        }
+        @if (saving()) {
+          <mat-progress-bar mode="indeterminate" />
+        }
+        <div class="send-bar">
+          <button mat-flat-button type="submit" class="send" [disabled]="saving()">
+            <mat-icon>send</mat-icon> {{ saving() ? 'Saving…' : 'Send' }}
+          </button>
+        </div>
+      </form>
+    }
+  </div>
+}

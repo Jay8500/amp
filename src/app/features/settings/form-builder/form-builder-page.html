@@ -1,0 +1,89 @@
+<app-page-header [title]="'Edit ' + title()" fallback="/settings">
+  <button mat-icon-button type="button" aria-label="Reset to defaults" (click)="resetDefaults()"><mat-icon>restart_alt</mat-icon></button>
+</app-page-header>
+@if (saving()) {
+  <mat-progress-bar mode="indeterminate" />
+}
+
+<div class="page">
+  <mat-form-field class="sheet-name">
+    <mat-label>Sheet tab name</mat-label>
+    <input matInput [ngModel]="draft().sheetName" (ngModelChange)="setSheetName($event)" (blur)="loadHeaders()" />
+    <mat-hint>The tab in your Google Sheet where these rows are saved. It is created if missing.</mat-hint>
+  </mat-form-field>
+
+  <p class="hint">Drag <mat-icon inline>drag_indicator</mat-icon> to reorder. Fields marked <mat-icon inline>lock</mat-icon> are needed by the app and can't be removed, but you can rename them and change their column.</p>
+
+  <mat-accordion cdkDropList (cdkDropListDropped)="drop($event)" class="fields">
+    @for (f of draft().fields; track f.key) {
+      <mat-expansion-panel cdkDrag cdkDragLockAxis="y" class="field">
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <mat-icon cdkDragHandle class="handle" (click)="$event.stopPropagation()">drag_indicator</mat-icon>
+            <span class="title-text">{{ f.label }}</span>
+            @if (f.required) { <span class="req">*</span> }
+          </mat-panel-title>
+          <mat-panel-description>
+            <span class="col">→ {{ f.column }}</span>
+            @if (isLocked(f)) { <mat-icon inline>lock</mat-icon> }
+          </mat-panel-description>
+        </mat-expansion-panel-header>
+
+        <div class="editor">
+          <mat-form-field>
+            <mat-label>Label on form</mat-label>
+            <input matInput [ngModel]="f.label" (ngModelChange)="update(f, { label: $event })" />
+          </mat-form-field>
+
+          <mat-form-field>
+            <mat-label>Sheet column</mat-label>
+            <input matInput [ngModel]="f.column" (ngModelChange)="update(f, { column: $event })" [matAutocomplete]="cols" />
+            <mat-autocomplete #cols>
+              @for (h of freeHeaders(f.column); track h) {
+                <mat-option [value]="h">{{ h }}</mat-option>
+              }
+            </mat-autocomplete>
+            <mat-hint>Column header in row 1. Added automatically if it doesn't exist.</mat-hint>
+          </mat-form-field>
+
+          @if (typeFixed(f)) {
+            <p class="fixed-type">Type: {{ typeLabel(f) }}</p>
+          } @else {
+            <mat-form-field>
+              <mat-label>Type</mat-label>
+              <mat-select [value]="f.type" (valueChange)="update(f, { type: $event })">
+                @for (t of types; track t.value) {
+                  <mat-option [value]="t.value">{{ t.label }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          }
+
+          @if (f.type === 'select' && f.role !== 'status') {
+            <mat-form-field>
+              <mat-label>Dropdown options (comma separated)</mat-label>
+              <input matInput [ngModel]="(f.options ?? []).join(', ')" (ngModelChange)="setOptions(f, $event)" />
+            </mat-form-field>
+          }
+
+          <div class="row">
+            <mat-slide-toggle [checked]="f.required" (change)="update(f, { required: $event.checked })" [disabled]="isLocked(f)">
+              Required
+            </mat-slide-toggle>
+            @if (!isLocked(f)) {
+              <button mat-button class="danger" type="button" (click)="removeField(f)"><mat-icon>delete</mat-icon> Remove</button>
+            }
+          </div>
+        </div>
+      </mat-expansion-panel>
+    }
+  </mat-accordion>
+
+  <button mat-stroked-button type="button" class="add" (click)="addField()"><mat-icon>add</mat-icon> Add field</button>
+
+  @if (dirty() || saving()) {
+    <div class="save-bar">
+      <button mat-flat-button type="button" (click)="save()" [disabled]="saving()">{{ saving() ? 'Saving…' : 'Save form' }}</button>
+    </div>
+  }
+</div>
