@@ -42,6 +42,11 @@ import { PoweredBy } from '../../shared/components/powered-by/powered-by';
         <button mat-flat-button type="submit" [disabled]="busy()">{{ busy() ? 'Signing in…' : 'Sign in' }}</button>
       </form>
 
+      <button mat-stroked-button type="button" class="demo-btn" (click)="tryDemo()" [disabled]="demoBusy()">
+        <mat-icon>play_circle</mat-icon> Try demo with sample data
+      </button>
+      <p class="demo-note">No Google Sheet needed. Nothing is saved.</p>
+
       <div class="links">
         <a mat-button routerLink="/setup">New seller? Set up</a>
         <a mat-button routerLink="/forgot-pin">Forgot PIN?</a>
@@ -88,6 +93,18 @@ export class LoginPage implements OnInit {
       }
     } finally {
       this.busy.set(false);
+    }
+  }
+
+  protected demoBusy = signal(false);
+
+  async tryDemo(): Promise<void> {
+    this.demoBusy.set(true);
+    try {
+      await this.session.startDemo();
+      await this.router.navigateByUrl('/home', { replaceUrl: true });
+    } finally {
+      this.demoBusy.set(false);
     }
   }
 }

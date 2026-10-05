@@ -2,6 +2,7 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { SellerProfile } from '../models/seller.model';
 import { hashPin, newSalt } from '../utils/crypto';
 import { ConfigService } from './config.service';
+import { DEMO_URL } from './demo-bridge';
 import { LocalStoreService } from './local-store.service';
 import { RecordsService } from './records.service';
 import { SheetsApiService } from './sheets-api.service';
@@ -33,6 +34,7 @@ export class SessionService {
   readonly displayName = computed(() => this.profile()?.displayName || this.profile()?.sellerId || '');
   readonly scriptUrl = computed(() => this.profile()?.scriptUrl ?? '');
   readonly loggedIn = computed(() => this.profile() !== null);
+  readonly isDemo = computed(() => this.profile()?.scriptUrl === DEMO_URL);
 
   /** Called once at startup to resume an unexpired session. */
   async restore(): Promise<void> {
@@ -95,6 +97,19 @@ export class SessionService {
     await this.store.putSeller(updated);
     this.records.clear();
     await this.activate(updated, false);
+  }
+
+  /**
+   * Demo mode: sample data held in memory (see DemoBridge). Nothing is written to the
+   * device, so a reload simply ends the demo.
+   */
+  async startDemo(): Promise<void> {
+    this.api.resetDemo();
+    this.records.clear();
+    const profile: SellerProfile = { sellerId: 'demo', displayName: 'Demo Seller', pinHash: '', salt: '', scriptUrl: DEMO_URL, createdAt: Date.now() };
+    this.api.setUrl(DEMO_URL);
+    this.profile.set(profile);
+    await this.config.load(profile.sellerId, false);
   }
 
   async logout(): Promise<void> {

@@ -24,6 +24,11 @@ import { PoweredBy } from '../../shared/components/powered-by/powered-by';
       <h1>Set up seller</h1>
       <p class="sub">Connect your own Google Sheet and choose a PIN for this device.</p>
 
+      <button mat-stroked-button type="button" class="demo-btn" (click)="tryDemo()" [disabled]="demoBusy()">
+        <mat-icon>play_circle</mat-icon> Try demo with sample data
+      </button>
+      <p class="demo-note">No Google Sheet needed. Nothing is saved.</p>
+
       <h2 class="step"><span>1</span> Connect Google Sheet</h2>
       <app-script-help />
 
@@ -143,6 +148,18 @@ export class SetupPage {
       this.error.set((err as Error).message);
     } finally {
       this.busy.set(false);
+    }
+  }
+
+  protected demoBusy = signal(false);
+
+  async tryDemo(): Promise<void> {
+    this.demoBusy.set(true);
+    try {
+      await this.session.startDemo();
+      await this.router.navigateByUrl('/home', { replaceUrl: true });
+    } finally {
+      this.demoBusy.set(false);
     }
   }
 }

@@ -34,6 +34,9 @@ import { ScriptHelp } from '../../../shared/components/script-help/script-help';
         <button mat-stroked-button type="button" (click)="checkCurrent()" [disabled]="busy()">Test connection</button>
       </section>
 
+      @if (session.isDemo()) {
+        <p class="hint">You are in Demo mode with sample data. Sign out and use <b>Set up</b> to connect a real Google Sheet.</p>
+      } @else {
       <section>
         <h2>Change Apps Script URL</h2>
         <p class="hint">Use this after you re-deploy the script as a <i>new</i> deployment or move to a different Sheet. If you only made a new version of the same deployment, the URL stays the same.</p>
@@ -50,6 +53,7 @@ import { ScriptHelp } from '../../../shared/components/script-help/script-help';
         }
         <button mat-flat-button type="button" (click)="change()" [disabled]="busy() || !url.value">Test & save</button>
       </section>
+      }
     </div>
   `,
   styles: `
@@ -63,7 +67,7 @@ import { ScriptHelp } from '../../../shared/components/script-help/script-help';
   `,
 })
 export class ConnectionPage {
-  private session = inject(SessionService);
+  protected session = inject(SessionService);
   private api = inject(SheetsApiService);
   private config = inject(ConfigService);
   private snack = inject(MatSnackBar);

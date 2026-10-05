@@ -35,9 +35,10 @@ export class ConfigService {
     return [...builtIns, ...custom].filter((b) => !b.hidden);
   });
 
-  async load(sellerId: string): Promise<void> {
-    this.sellerId = sellerId;
-    const cached = await this.store.getCachedConfig(sellerId);
+  /** `useCache: false` (Demo mode) keeps the config in memory only. */
+  async load(sellerId: string, useCache = true): Promise<void> {
+    this.sellerId = useCache ? sellerId : '';
+    const cached = useCache ? await this.store.getCachedConfig(sellerId) : undefined;
     if (cached) {
       this.config.set(withDefaults(cached));
       void this.refresh(); // update in background

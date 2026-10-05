@@ -153,6 +153,18 @@ body {
     }
   }
 
+  .demo-btn {
+    width: 100%;
+    height: 48px;
+    margin-top: 20px;
+  }
+
+  .demo-note {
+    margin: 6px 0 0;
+    font: var(--mat-sys-body-small);
+    color: var(--mat-sys-on-surface-variant);
+  }
+
   .links {
     display: flex;
     flex-wrap: wrap;

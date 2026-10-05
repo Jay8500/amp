@@ -2,6 +2,7 @@ import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http
 import { Injectable, inject } from '@angular/core';
 import { firstValueFrom, timeout } from 'rxjs';
 import { SheetRecord } from '../models/record.model';
+import { DEMO_URL, DemoBridge } from './demo-bridge';
 
 interface BridgeResponse<T> {
   ok: boolean;
@@ -72,7 +73,22 @@ export class SheetsApiService {
     return this.call({ action: 'remove', sheet, id });
   }
 
+  /** Starts a fresh set of sample data (Demo mode). */
+  resetDemo(): void {
+    this.demo = new DemoBridge();
+  }
+
+  private demo = new DemoBridge();
+
   private async call<T>(body: object, url = this.url): Promise<T> {
+    if (url === DEMO_URL) {
+      await new Promise((r) => setTimeout(r, 150)); // feel like a network call
+      try {
+        return this.demo.handle(body as Record<string, unknown>) as T;
+      } catch (err) {
+        throw new BridgeError((err as Error).message);
+      }
+    }
     if (!url) throw new BridgeError('Google Sheet is not connected.');
     if (!navigator.onLine) throw new BridgeError('You are offline. Connect to the internet and try again.');
 

@@ -2,7 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatRippleModule } from '@angular/material/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { ConfigService } from '../../core/services/config.service';
 import { ExpiryService } from '../../core/services/expiry.service';
 import { RecordsService } from '../../core/services/records.service';
@@ -19,6 +19,13 @@ import { PoweredBy } from '../../shared/components/powered-by/powered-by';
     </app-page-header>
 
     <div class="page">
+      @if (session.isDemo()) {
+        <div class="banner demo">
+          <mat-icon>science</mat-icon>
+          <span><b>Demo mode.</b> Sample data only, nothing is saved. Sales still open real WhatsApp, so use your own number.</span>
+          <button mat-button (click)="exitDemo()">Exit</button>
+        </div>
+      }
       @if (config.syncError(); as err) {
         <div class="banner">
           <mat-icon>sync_problem</mat-icon>
@@ -82,6 +89,7 @@ import { PoweredBy } from '../../shared/components/powered-by/powered-by';
     .sale { background: var(--mat-sys-primary-container); color: var(--mat-sys-on-primary-container); }
     .data { background: var(--mat-sys-tertiary-container); color: var(--mat-sys-on-tertiary-container); }
     .recent { background: var(--mat-sys-secondary-container); color: var(--mat-sys-on-secondary-container); }
+    .banner.demo { background: var(--mat-sys-tertiary-container); color: var(--mat-sys-on-tertiary-container); }
     .alert-strip {
       display: flex; align-items: center; gap: 10px; padding: 12px 14px; margin-bottom: 16px; border-radius: 14px;
       background: var(--mat-sys-error-container); color: var(--mat-sys-on-error-container); text-decoration: none; position: relative;
@@ -94,8 +102,14 @@ export class HomePage implements OnInit {
   protected config = inject(ConfigService);
   protected expiry = inject(ExpiryService);
   private records = inject(RecordsService);
+  private router = inject(Router);
 
   ngOnInit(): void {
     void this.records.load('sale');
+  }
+
+  async exitDemo(): Promise<void> {
+    await this.session.logout();
+    await this.router.navigateByUrl('/login', { replaceUrl: true });
   }
 }
