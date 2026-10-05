@@ -16,6 +16,7 @@ import { RecordsService } from '../../core/services/records.service';
 import { WhatsappService } from '../../core/services/whatsapp.service';
 import { displayDate, parseDate, todayIso } from '../../core/utils/dates';
 import { BrandAvatar } from '../../shared/components/brand-avatar/brand-avatar';
+import { openDatePicker } from '../../shared/components/dynamic-fields/dynamic-form';
 import { PageHeader } from '../../shared/components/page-header/page-header';
 import { StateMessage } from '../../shared/components/state-message/state-message';
 
@@ -100,6 +101,10 @@ export class RecentSalesPage implements OnInit {
 
   protected brandFor(name: string) {
     return this.config.brands().find((b) => b.name.toLowerCase() === name.toLowerCase());
+  }
+
+  protected pick(native: HTMLInputElement): void {
+    openDatePicker(native);
   }
 
   protected clearFilters(): void {

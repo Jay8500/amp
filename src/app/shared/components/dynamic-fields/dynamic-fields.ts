@@ -7,7 +7,9 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { OttBrand } from '../../../core/models/brand.model';
 import { FormField, ValidityPlan } from '../../../core/models/form-config.model';
-import { DynamicGroup } from './dynamic-form';
+import { ErrorStateMatcher } from '@angular/material/core';
+import { displayDate } from '../../../core/utils/dates';
+import { DynamicGroup, openDatePicker } from './dynamic-form';
 
 /** Renders configured fields as Material inputs bound to a group built by `buildGroup`. */
 @Component({
@@ -67,11 +69,19 @@ import { DynamicGroup } from './dynamic-form';
                 <input matInput [formControlName]="f.key" inputmode="decimal" [readonly]="readonly()" />
               }
               @case ('date') {
-                <input matInput [formControlName]="f.key" type="date" [readonly]="readonly()" />
+                <!-- Shown as dd-MM-yyyy; the hidden native input provides the phone's calendar picker. -->
+                <input matInput readonly class="date-display" placeholder="dd-mm-yyyy" [required]="f.required"
+                       [value]="shownDate(f.key)" [errorStateMatcher]="dateErrors(f.key)"
+                       (click)="pickDate(native)" (keydown.enter)="pickDate(native)" (keydown.space)="pickDate(native)" />
+                <input #native type="date" class="native-date" tabindex="-1" aria-hidden="true"
+                       [formControlName]="f.key" (change)="group().controls[f.key].markAsTouched()" />
               }
               @default {
                 <input matInput [formControlName]="f.key" autocomplete="off" [readonly]="readonly()" />
               }
+            }
+            @if (f.type === 'date') {
+              <mat-icon matSuffix class="date-icon" aria-hidden="true">calendar_month</mat-icon>
             }
             @if (f.type === 'password') {
               <button mat-icon-button matSuffix type="button" (click)="toggleReveal(f.key)"
@@ -92,6 +102,9 @@ import { DynamicGroup } from './dynamic-form';
   styles: `
     .fields { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); gap: 12px 12px; }
     .full { grid-column: 1 / -1; }
+    .date-display { cursor: pointer; }
+    .date-icon { margin-right: 12px; color: var(--mat-sys-on-surface-variant); pointer-events: none; }
+    .native-date { position: absolute; left: 0; bottom: 0; width: 1px; height: 1px; opacity: 0; pointer-events: none; border: 0; padding: 0; }
   `,
 })
 export class DynamicFields {
@@ -112,6 +125,21 @@ export class DynamicFields {
     const v = this.group().controls[f.key]?.value;
     return !!v && !known.includes(v);
   }
+
+  protected shownDate(key: string): string {
+    return displayDate(this.group().controls[key]?.value);
+  }
+
+  protected pickDate(native: HTMLInputElement): void {
+    if (!this.readonly()) openDatePicker(native);
+  }
+
+  /** The visible date box isn't the form control, so it borrows the real control's error state. */
+  protected dateErrors(key: string): ErrorStateMatcher {
+    return (this.matchers[key] ??= { isErrorState: () => this.group().controls[key].invalid && this.group().controls[key].touched });
+  }
+
+  private matchers: Record<string, ErrorStateMatcher> = {};
 
   protected toggleReveal(key: string): void {
     this.revealed.update((s) => {

@@ -25,11 +25,13 @@
     <div class="filter-grid">
       <mat-form-field>
         <mat-label>From</mat-label>
-        <input matInput type="date" [ngModel]="from()" (ngModelChange)="from.set($event)" />
+        <input matInput readonly class="date-display" placeholder="dd-mm-yyyy" [value]="displayDate(from())" (click)="pick(fromNative)" />
+        <input #fromNative type="date" class="native-date" tabindex="-1" aria-hidden="true" [value]="from()" (change)="from.set(fromNative.value)" />
       </mat-form-field>
       <mat-form-field>
         <mat-label>To</mat-label>
-        <input matInput type="date" [ngModel]="to()" (ngModelChange)="to.set($event)" />
+        <input matInput readonly class="date-display" placeholder="dd-mm-yyyy" [value]="displayDate(to())" (click)="pick(toNative)" />
+        <input #toNative type="date" class="native-date" tabindex="-1" aria-hidden="true" [value]="to()" (change)="to.set(toNative.value)" />
       </mat-form-field>
       <mat-form-field>
         <mat-label>Plan</mat-label>

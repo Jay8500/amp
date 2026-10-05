@@ -31,6 +31,19 @@ export function fromRecord(fields: FormField[], row: SheetRecord | Record<string
   return out;
 }
 
+/**
+ * Opens the browser's own calendar for a (visually hidden) <input type="date">. We show the
+ * value ourselves as dd-MM-yyyy because the native box follows the phone's language setting
+ * (e.g. US English shows 10/05/2026 for 5 October).
+ */
+export function openDatePicker(input: HTMLInputElement): void {
+  try {
+    input.showPicker();
+  } catch {
+    input.focus(); // very old browsers: at least put focus on the native field
+  }
+}
+
 export function fieldKeyFor(fields: FormField[], role: FormField['role']): string | undefined {
   return fields.find((f) => f.role === role)?.key;
 }

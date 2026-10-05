@@ -61,3 +61,20 @@
     white-space: nowrap;
   }
 }
+
+/* dd-mm-yyyy display box over the phone's own (hidden) date picker */
+.date-display {
+  cursor: pointer;
+}
+
+.native-date {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+  border: 0;
+  padding: 0;
+}
