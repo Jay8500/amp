@@ -8,10 +8,11 @@ import { MatInputModule } from '@angular/material/input';
 import { Router, RouterLink } from '@angular/router';
 import { SessionService } from '../../core/services/session.service';
 import { PIN_PATTERN } from '../../core/utils/validators';
+import { PoweredBy } from '../../shared/components/powered-by/powered-by';
 
 @Component({
   selector: 'app-login-page',
-  imports: [ReactiveFormsModule, RouterLink, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatAutocompleteModule],
+  imports: [PoweredBy, ReactiveFormsModule, RouterLink, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatAutocompleteModule],
   template: `
     <div class="auth-page">
       <div class="brand-mark"><mat-icon>subscriptions</mat-icon></div>
@@ -45,6 +46,7 @@ import { PIN_PATTERN } from '../../core/utils/validators';
         <a mat-button routerLink="/setup">New seller? Set up</a>
         <a mat-button routerLink="/forgot-pin">Forgot PIN?</a>
       </div>
+      <app-powered-by />
     </div>
   `,
 })

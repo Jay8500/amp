@@ -46,8 +46,9 @@ export class SessionService {
     return !!(await this.store.getSeller(normalizeSellerId(sellerId)));
   }
 
-  knownSellers(): Promise<string[]> {
-    return this.store.listSellerIds();
+  /** Seller IDs on this device, as originally typed. */
+  async knownSellers(): Promise<string[]> {
+    return (await this.store.listSellers()).map((p) => p.displayName || p.sellerId);
   }
 
   async login(sellerId: string, pin: string): Promise<boolean> {

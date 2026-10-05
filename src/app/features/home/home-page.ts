@@ -8,10 +8,11 @@ import { ExpiryService } from '../../core/services/expiry.service';
 import { RecordsService } from '../../core/services/records.service';
 import { SessionService } from '../../core/services/session.service';
 import { PageHeader } from '../../shared/components/page-header/page-header';
+import { PoweredBy } from '../../shared/components/powered-by/powered-by';
 
 @Component({
   selector: 'app-home-page',
-  imports: [RouterLink, MatIconModule, MatButtonModule, MatRippleModule, PageHeader],
+  imports: [PoweredBy, RouterLink, MatIconModule, MatButtonModule, MatRippleModule, PageHeader],
   template: `
     <app-page-header [title]="'Hi, ' + session.displayName()" [back]="false">
       <a mat-icon-button routerLink="/settings" aria-label="Settings"><mat-icon>settings</mat-icon></a>
@@ -61,6 +62,7 @@ import { PageHeader } from '../../shared/components/page-header/page-header';
           </div>
         </a>
       </div>
+      <app-powered-by />
     </div>
   `,
   styles: `

@@ -7,10 +7,11 @@ import { MatInputModule } from '@angular/material/input';
 import { Router, RouterLink } from '@angular/router';
 import { SessionService } from '../../core/services/session.service';
 import { PIN_PATTERN, pinsMatch } from '../../core/utils/validators';
+import { PoweredBy } from '../../shared/components/powered-by/powered-by';
 
 @Component({
   selector: 'app-forgot-pin-page',
-  imports: [ReactiveFormsModule, RouterLink, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule],
+  imports: [PoweredBy, ReactiveFormsModule, RouterLink, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule],
   template: `
     <div class="auth-page">
       <div class="brand-mark"><mat-icon>lock_reset</mat-icon></div>
@@ -41,6 +42,7 @@ import { PIN_PATTERN, pinsMatch } from '../../core/utils/validators';
         <button mat-flat-button type="submit" [disabled]="busy()">{{ busy() ? 'Checking…' : 'Reset PIN' }}</button>
       </form>
       <div class="links"><a mat-button routerLink="/login">Back to sign in</a></div>
+      <app-powered-by />
     </div>
   `,
 })

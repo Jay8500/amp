@@ -11,10 +11,11 @@ import { SessionService } from '../../core/services/session.service';
 import { BrandAvatar } from '../../shared/components/brand-avatar/brand-avatar';
 import { confirmDialog } from '../../shared/components/confirm-dialog/confirm-dialog';
 import { PageHeader } from '../../shared/components/page-header/page-header';
+import { PoweredBy } from '../../shared/components/powered-by/powered-by';
 
 @Component({
   selector: 'app-settings-page',
-  imports: [RouterLink, MatListModule, MatIconModule, MatButtonModule, PageHeader, BrandAvatar],
+  imports: [PoweredBy, RouterLink, MatListModule, MatIconModule, MatButtonModule, PageHeader, BrandAvatar],
   template: `
     <app-page-header title="Settings" />
     <mat-nav-list>
@@ -60,6 +61,7 @@ import { PageHeader } from '../../shared/components/page-header/page-header';
         }
       </div>
     }
+    <app-powered-by />
   `,
   styles: `
     .hidden-brands h3 { font: var(--mat-sys-title-small); margin: 0 0 8px; }

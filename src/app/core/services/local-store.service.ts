@@ -39,8 +39,8 @@ export class LocalStoreService {
     return (await this.open()).get('sellers', sellerId);
   }
 
-  async listSellerIds(): Promise<string[]> {
-    return (await this.open()).getAllKeys('sellers');
+  async listSellers(): Promise<SellerProfile[]> {
+    return (await this.open()).getAll('sellers');
   }
 
   async putSeller(profile: SellerProfile): Promise<void> {

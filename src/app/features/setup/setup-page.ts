@@ -10,10 +10,11 @@ import { SessionService } from '../../core/services/session.service';
 import { PingResult, SheetsApiService } from '../../core/services/sheets-api.service';
 import { PIN_PATTERN, pinsMatch, scriptUrlValidator } from '../../core/utils/validators';
 import { ScriptHelp } from '../../shared/components/script-help/script-help';
+import { PoweredBy } from '../../shared/components/powered-by/powered-by';
 
 @Component({
   selector: 'app-setup-page',
-  imports: [
+  imports: [PoweredBy, 
     ReactiveFormsModule, RouterLink, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule,
     MatProgressSpinnerModule, ScriptHelp,
   ],
@@ -69,6 +70,7 @@ import { ScriptHelp } from '../../shared/components/script-help/script-help';
       </form>
 
       <div class="links"><a mat-button routerLink="/login">I already have a seller ID</a></div>
+      <app-powered-by />
     </div>
   `,
   styles: `
